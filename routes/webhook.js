@@ -2,23 +2,11 @@ var express = require('express');
 var router = express.Router();
 
 const
-  chatService = require('../server/chatService'),
-  config = require('config');
-
-const VALIDATION_TOKEN = (process.env.MESSENGER_VALIDATION_TOKEN) ?
-  (process.env.MESSENGER_VALIDATION_TOKEN) :
-  config.get('validationToken');
+  chatService = require('../server/chatService');
 
 /* GET webhook auth. */
 router.get('/', function(req, res, next) {
-  if (req.query['hub.mode'] === 'subscribe' &&
-      req.query['hub.verify_token'] === VALIDATION_TOKEN) {
-    console.log("Validating webhook");
-    res.status(200).send(req.query['hub.challenge']);
-  } else {
-    console.error("Failed validation. Make sure the validation tokens match.");
-    res.sendStatus(403);
-  }
+  chatService.authenticate(req, res);
 });
 
 /* POST route for receiving message */
