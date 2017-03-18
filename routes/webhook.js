@@ -1,9 +1,13 @@
 var express = require('express');
-var request = require('request');
 var router = express.Router();
 
-var VALIDATION_TOKEN = 'EAADfnKWUqqgBAB2qpOALrtmvxWuiHDsEW8aVUSRdOZChvtG2fpT5coT3GDl0taZBGWgybuHCcu23PqOMsjIzhB8TuATHjGihxb52glDTEO1tZCvSMP2bOccSXFgCkwQdh49aZCTOBSWV8vmIPgGhncjHEkreF6jRMuJaPTUrGQZDZD';
-var PAGE_ACCESS_TOKEN = 'EAADfnKWUqqgBAB2qpOALrtmvxWuiHDsEW8aVUSRdOZChvtG2fpT5coT3GDl0taZBGWgybuHCcu23PqOMsjIzhB8TuATHjGihxb52glDTEO1tZCvSMP2bOccSXFgCkwQdh49aZCTOBSWV8vmIPgGhncjHEkreF6jRMuJaPTUrGQZDZD'
+const
+  chatService = require('../server/chatService'),
+  config = require('config');
+
+const VALIDATION_TOKEN = (process.env.MESSENGER_VALIDATION_TOKEN) ?
+  (process.env.MESSENGER_VALIDATION_TOKEN) :
+  config.get('validationToken');
 
 /* GET webhook auth. */
 router.get('/', function(req, res, next) {
@@ -17,7 +21,7 @@ router.get('/', function(req, res, next) {
   }
 });
 
-/* POST webhook */
+/* POST route for receiving message */
 router.post('/', function (req, res) {
   var data = req.body;
   // Make sure this is a page subscription
@@ -29,7 +33,7 @@ router.post('/', function (req, res) {
       // Iterate over each messaging event
       entry.messaging.forEach(function(event) {
         if (event.message) {
-          receivedMessage(event);
+          chatService.receivedMessage(event);
         } else {
           console.log("Webhook received unknown event: ", event);
         }
@@ -44,72 +48,5 @@ router.post('/', function (req, res) {
     res.sendStatus(200);
   }
 });
-
-function receivedMessage(event) {
-  var senderID = event.sender.id;
-  var recipientID = event.recipient.id;
-  var timeOfMessage = event.timestamp;
-  var message = event.message;
-
-  console.log("Received message for user %d and page %d at %d with message:",
-    senderID, recipientID, timeOfMessage);
-  console.log(JSON.stringify(message));
-
-  var messageId = message.mid;
-
-  var messageText = message.text;
-  var messageAttachments = message.attachments;
-
-  if (messageText) {
-    switch (messageText) {
-      case 'generic':
-        sendGenericMessage(senderID);
-        break;
-      default:
-        sendTextMessage(senderID, messageText);
-    }
-  } else if (messageAttachments) {
-    sendTextMessage(senderID, "Message with attachment received");
-  }
-}
-
-function sendGenericMessage(recipientId, messageText) {
-  // To be expanded in later sections
-}
-
-function sendTextMessage(recipientId, messageText) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      text: messageText
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-function callSendAPI(messageData) {
-  request({
-    uri: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
-    method: 'POST',
-    json: messageData
-
-  }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var recipientId = body.recipient_id;
-      var messageId = body.message_id;
-
-      console.log("Successfully sent generic message with id %s to recipient %s",
-        messageId, recipientId);
-    } else {
-      console.error("Unable to send message.");
-      console.error(response);
-      console.error(error);
-    }
-  });
-}
 
 module.exports = router;
