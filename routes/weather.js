@@ -9,7 +9,11 @@ const
 router.get('/', function(req, res, next) {
   weatherService.getGeolocalisation('Grenoble')
     .then(function (body) {
-      res.send(parser.parse(body).results[0].geometry.location);
+      var location = parser.parse(body).results[0].geometry.location;
+      weatherService.getWeatherForecast(location.lat, location.lng)
+        .then(function (body) {
+          res.send(body);
+        });
     })
     .catch(function (err) {
     })

@@ -14,6 +14,7 @@
     "jade": "~1.11.0",
     "json-parser": "^1.1.5",
     "morgan": "~1.7.0",
+    "node-json-db": "^0.7.3",
     "request": "^2.81.0",
     "request-promise": "^4.2.0",
     "serve-favicon": "~2.3.2"
