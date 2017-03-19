@@ -3,7 +3,9 @@ var router = express.Router();
 
 const
   chatService = require('../server/chatService'),
-  userService = require('../server/userService');
+  weatherService = require('../server/weatherService'),
+  userService = require('../server/userService'),
+  parser = require('json-parser');
 
 /* GET webhook auth. */
 router.get('/', function(req, res, next) {
@@ -25,11 +27,33 @@ router.post('/', function (req, res) {
           if (!userService.isUserKnown(senderId)) {
             userService.addUser(senderId, {
               id: senderId,
-              createdAt: timeOfEvent
+              createdAt: timeOfEvent,
+              status: 'station'
             });
             chatService.sendTextMessage(senderId, 'Hello, my name is Shauny️️ nice to meet you ! \nI\'m here to help you to find the best spot ❄️️❄️️❄️️️ \nTo do so, send me a station name');
           } else {
-            chatService.receivedMessage(event);
+            var user = userService.getUser(senderId);
+            var message = event.message;
+            switch(user.status) {
+              case 'station':
+                weatherService.getGeolocalisation(message.text)
+                  .then(function (body) {
+                    var response = parser.parse(body).results;
+                    if (response.length <= 0) {
+                      chatService.sendTextMessage(senderId, 'I don\'t find any city with this name 😢, can you verify the typo or try something else 🙂');
+                    } else {
+                      var location = response[0].geometry.location;
+                      chatService.sendTextMessage(senderId, 'You ask for ' + message.text + '\n lattitude : ' + location.lat + '\n longitude' + location.lng);
+                    }
+                  })
+                  .catch(function (err) {
+                    console.log(err);
+                    chatService.sendTextMessage(senderId, 'Internal error 🤒');
+                  })
+                break;
+              default:
+                chatService.sendTextMessage(senderId, 'Your status : ' + user.status);
+            }
           }
         } else {
           console.log("Webhook received unknown event: ", event);

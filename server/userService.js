@@ -14,7 +14,12 @@ function addUser(senderId, userData) {
   db.push('/users/' + senderId, userData)
 }
 
+function getUser(senderId, userData) {
+  return db.getData('/users/' + senderId);
+}
+
 module.exports = {
   isUserKnown: isUserKnown,
-  addUser: addUser
+  addUser: addUser,
+  getUser: getUser
 }
