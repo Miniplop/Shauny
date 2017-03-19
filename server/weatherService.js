@@ -11,10 +11,6 @@ const WEATHER_API_TOKEN = (process.env.WEATHER_API_TOKEN) ?
   (process.env.WEATHER_API_TOKEN) :
   config.get('weatherApiToken');
 
-const WEATHER_API_KEY = (process.env.WEATHER_API_KEY) ?
-  (process.env.WEATHER_API_KEY) :
-  config.get('weatherApiKey');
-
 function getGeolocalisation(cityName) {
   return request({
     uri: 'https://maps.googleapis.com/maps/api/geocode/json',
@@ -28,11 +24,12 @@ function getGeolocalisation(cityName) {
 
 function getWeatherForecast(lat, lng) {
   return request({
-    uri: 'http://www.infoclimat.fr/public-api/gfs/json',
+    uri: 'http://api.openweathermap.org/data/2.5/forecast/daily',
     qs: {
-      _auth: WEATHER_API_TOKEN,
-      _c: WEATHER_API_KEY,
-      _ll: lat + ',' + lng
+      APPID: WEATHER_API_TOKEN,
+      lat: lat,
+      lon: lng,
+      cnt: 10
     },
     method: 'GET'
   });

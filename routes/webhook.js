@@ -46,18 +46,31 @@ router.post('/', function (req, res) {
                       chatService.sendTextMessage(senderId, 'You ask for ' + message.text + '\n Lattitude : ' + location.lat + '\n Longitude : ' + location.lng);
                       weatherService.getWeatherForecast(location.lat, location.lng)
                         .then(function (body) {
-                          chatService.sendQuickReply(senderId, 'This is the weather forecast for ' + message.text, [
-                            {
-                              "content_type":"text",
-                              "title":"Action",
-                              "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
-                            },
-                            {
-                              "content_type":"text",
-                              "title":"Comedy",
-                              "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"
-                            }
-                          ]);
+                            chatService.sendCarouselReply(senderId, [
+                              {
+                                "title":"Welcome to Peter\'s Hats",
+                                "image_url":"https://petersfancybrownhats.com/company_image.png",
+                                "subtitle":"We\'ve got the right hat for everyone.",
+                                "default_action": {
+                                  "type": "web_url",
+                                  "url": "https://peterssendreceiveapp.ngrok.io/view?item=103",
+                                  "messenger_extensions": true,
+                                  "webview_height_ratio": "tall",
+                                  "fallback_url": "https://peterssendreceiveapp.ngrok.io/"
+                                },
+                                "buttons":[
+                                  {
+                                    "type":"web_url",
+                                    "url":"https://petersfancybrownhats.com",
+                                    "title":"View Website"
+                                  },{
+                                    "type":"postback",
+                                    "title":"Start Chatting",
+                                    "payload":"DEVELOPER_DEFINED_PAYLOAD"
+                                  }
+                                ]
+                              }
+                            ]);
                           userService.changeUserStatus(senderId, 'weather');
                         })
                         .catch(function (err) {

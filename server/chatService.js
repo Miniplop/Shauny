@@ -80,6 +80,25 @@ function sendQuickReply(recipientId, message,  quick_replies) {
   callSendAPI(messageData);
 }
 
+function sendCarouselReply(recipientId,  carousel) {
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      attachment: {
+        type: "template",
+        payload: {
+          template_type: "generic",
+          elements: carousel
+        }
+      }
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
 function callSendAPI(messageData) {
   request({
     uri: 'https://graph.facebook.com/v2.6/me/messages',
@@ -107,5 +126,6 @@ module.exports = {
   receivedMessage: receivedMessage,
   sendTextMessage: sendTextMessage,
   sendQuickReply: sendQuickReply,
+  sendCarouselReply: sendCarouselReply,
   sendGenericMessage: sendGenericMessage
 }
