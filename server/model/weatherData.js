@@ -1,4 +1,11 @@
-const parser = require('json-parser');
+const
+  config = require('config'),
+  parser = require('json-parser');
+
+// Get the config const
+const SERVER_URL = (process.env.SERVER_URL) ?
+  (process.env.SERVER_URL) :
+  config.get('serverUrl');
 
 function WeatherData(openWeatherMapRawData) {
   openWeatherMapData = parser.parse(openWeatherMapRawData)
@@ -17,14 +24,43 @@ function WeatherData(openWeatherMapRawData) {
             max: convertKelvinToCelsius(element.temp.max)
           },
           weather : {
+            id : element.weather[0].id,
             main: element.weather[0].main,
-            description: element.weather[0].description
+            description: element.weather[0].description,
+            image: getweatherImage(element.weather[0].id)
           }
         }
       );
     })
 
     return result;
+  }
+
+  function getweatherImage(weatherId) {
+    var image = '';
+    switch  (Math.trunc(weatherId/100)) {
+      case(2):
+        image = 'thunderstorm.jpg';
+        break;
+      case(3):
+        image = 'drizzle.jpg';
+        break;
+      case(5):
+        image = 'rain.jpg';
+        break;
+      case(6):
+        image = 'snow.jpg';
+        break;
+      case(8):
+        if (weatherId === 800) {
+          image = 'clear.jpg';
+        } else {
+          image = 'cloud.jpg';
+        }
+        break;
+    }
+
+    return SERVER_URL + '/images/weather/' + image;
   }
 
   function convertKelvinToCelsius(temp) {
