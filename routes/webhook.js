@@ -44,7 +44,25 @@ router.post('/', function (req, res) {
                     } else {
                       var location = response[0].geometry.location;
                       chatService.sendTextMessage(senderId, 'You ask for ' + message.text + '\n Lattitude : ' + location.lat + '\n Longitude : ' + location.lng);
-                      userService.changeUserStatus(senderId, 'weather')
+                      weatherService.getWeatherForecast(location.lat, location.lng)
+                        .then(function (body) {
+                          chatService.sendQuickReply(senderId, 'This is the weather forecast for ' + message.text, [
+                            {
+                              "content_type":"text",
+                              "title":"Action",
+                              "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
+                            },
+                            {
+                              "content_type":"text",
+                              "title":"Comedy",
+                              "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"
+                            }
+                          ]);
+                          userService.changeUserStatus(senderId, 'weather');
+                        })
+                        .catch(function (err) {
+                          chatService.sendTextMessage(senderId, 'I have weather data for french city 🇫🇷, can you try something else 🙂');
+                        })
                     }
                   })
                   .catch(function (err) {

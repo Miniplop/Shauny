@@ -22,8 +22,6 @@ function receivedMessage(event) {
     senderID, recipientID, timeOfMessage);
   console.log(JSON.stringify(message));
 
-  var messageId = message.mid;
-
   var messageText = message.text;
   var messageAttachments = message.attachments;
 
@@ -68,6 +66,20 @@ function authenticate(req, res) {
   }
 }
 
+function sendQuickReply(recipientId, message,  quick_replies) {
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      text: message,
+      quick_replies: quick_replies
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
 function callSendAPI(messageData) {
   request({
     uri: 'https://graph.facebook.com/v2.6/me/messages',
@@ -94,5 +106,6 @@ module.exports = {
   authenticate: authenticate,
   receivedMessage: receivedMessage,
   sendTextMessage: sendTextMessage,
+  sendQuickReply: sendQuickReply,
   sendGenericMessage: sendGenericMessage
 }
