@@ -10,7 +10,11 @@ const
 
 /* GET webhook auth. */
 router.get('/', function(req, res, next) {
-  chatService.authenticate(req, res);
+  if (chatService.authenticate(req)) {
+    res.status(200).send(req.query['hub.challenge']);
+  } else {
+    res.sendStatus(403);
+  };
 });
 
 /* POST route for receiving message */
@@ -44,7 +48,7 @@ router.post('/', function (req, res) {
                       chatService.sendTextMessage(senderId, 'I don\'t find any city with this name 😢, can you verify the typo or try something else 🙂');
                     } else {
                       var location = response[0].geometry.location;
-                      chatService.sendTextMessage(senderId, 'This the forecast for ' + message.text);
+                      chatService.sendTextMessage(senderId, 'This the weather forecast for ' + message.text);
                       weatherService.getWeatherForecast(location.lat, location.lng)
                         .then(function (body) {
                             var weatherdata = new WeatherData(body);
