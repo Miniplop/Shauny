@@ -4,6 +4,7 @@ var router = express.Router();
 const
   chatService = require('../server/chatService'),
   weatherService = require('../server/weatherService'),
+  WeatherData = require('../server/model/weatherData'),
   userService = require('../server/userService'),
   parser = require('json-parser');
 
@@ -43,38 +44,29 @@ router.post('/', function (req, res) {
                       chatService.sendTextMessage(senderId, 'I don\'t find any city with this name 😢, can you verify the typo or try something else 🙂');
                     } else {
                       var location = response[0].geometry.location;
-                      chatService.sendTextMessage(senderId, 'You ask for ' + message.text + '\n Lattitude : ' + location.lat + '\n Longitude : ' + location.lng);
+                      chatService.sendTextMessage(senderId, 'This the forecast for ' + message.text);
                       weatherService.getWeatherForecast(location.lat, location.lng)
                         .then(function (body) {
-                            chatService.sendCarouselReply(senderId, [
-                              {
-                                "title":"Welcome to Peter\'s Hats",
-                                "image_url":"https://petersfancybrownhats.com/company_image.png",
-                                "subtitle":"We\'ve got the right hat for everyone.",
-                                "default_action": {
-                                  "type": "web_url",
-                                  "url": "https://peterssendreceiveapp.ngrok.io/view?item=103",
-                                  "messenger_extensions": true,
-                                  "webview_height_ratio": "tall",
-                                  "fallback_url": "https://peterssendreceiveapp.ngrok.io/"
-                                },
-                                "buttons":[
-                                  {
-                                    "type":"web_url",
-                                    "url":"https://petersfancybrownhats.com",
-                                    "title":"View Website"
-                                  },{
-                                    "type":"postback",
-                                    "title":"Start Chatting",
-                                    "payload":"DEVELOPER_DEFINED_PAYLOAD"
-                                  }
-                                ]
-                              }
-                            ]);
-                          userService.changeUserStatus(senderId, 'weather');
+                            var weatherdata = new WeatherData(body);
+                            var carousel = [];
+                            weatherdata.forecast.forEach(function (forecast) {
+                              carousel.push(
+                                {
+                                  title: forecast.display_date,
+                                  subtitle: forecast.weather.description + '\n Max : ' + forecast.temp.max + '°C\n Min : ' + forecast.temp.min + '°C',
+                                  image_url: forecast.weather.image,
+                                  buttons: [{
+                                    type: "web_url",
+                                    url: "http://maps.google.com/maps?z=12&t=m&q=loc:" + location.lat + "+" + location.lng,
+                                    title: "Open Google Map"
+                                  }]
+                                }
+                              )
+                            })
+                            chatService.sendCarouselReply(senderId, carousel);
                         })
                         .catch(function (err) {
-                          chatService.sendTextMessage(senderId, 'I have weather data for french city 🇫🇷, can you try something else 🙂');
+                          chatService.sendTextMessage(senderId, 'I don\'t have nay weather data for 😢, can you try something else 🙂');
                         })
                     }
                   })

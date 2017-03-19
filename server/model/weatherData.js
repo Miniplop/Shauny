@@ -18,6 +18,7 @@ function WeatherData(openWeatherMapRawData) {
       result.push(
         {
           date: new Date(element.dt * 1000),
+          display_date: getReadableDate(element.dt),
           temp: {
             day: convertKelvinToCelsius(element.temp.day),
             min: convertKelvinToCelsius(element.temp.min),
@@ -63,6 +64,17 @@ function WeatherData(openWeatherMapRawData) {
     return SERVER_URL + '/images/weather/' + image;
   }
 
+  function getReadableDate(timestamp) {
+    var d = new Date(timestamp * 1000);
+
+    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    var monthName = monthNames[d.getMonth()];
+    var dayName = days[d.getDay()];
+
+    return dayName + ' ' + d.getDate() + ' ' + monthName + ' ' + d.getFullYear();
+  }
   function convertKelvinToCelsius(temp) {
     return Math.round(temp - 273.15);
   }

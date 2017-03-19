@@ -80,7 +80,7 @@ function sendQuickReply(recipientId, message,  quick_replies) {
   callSendAPI(messageData);
 }
 
-function sendCarouselReply(recipientId,  carousel) {
+function sendCarouselReply(recipientId, carousel) {
   var messageData = {
     recipient: {
       id: recipientId
