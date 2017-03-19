@@ -14,12 +14,17 @@ function addUser(senderId, userData) {
   db.push('/users/' + senderId, userData)
 }
 
-function getUser(senderId, userData) {
+function getUser(senderId) {
   return db.getData('/users/' + senderId);
+}
+
+function changeUserStatus(senderId, status) {
+  db.push('/users/' + senderId + '/status', status);
 }
 
 module.exports = {
   isUserKnown: isUserKnown,
   addUser: addUser,
+  changeUserStatus: changeUserStatus,
   getUser: getUser
 }

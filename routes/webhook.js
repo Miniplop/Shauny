@@ -43,7 +43,8 @@ router.post('/', function (req, res) {
                       chatService.sendTextMessage(senderId, 'I don\'t find any city with this name 😢, can you verify the typo or try something else 🙂');
                     } else {
                       var location = response[0].geometry.location;
-                      chatService.sendTextMessage(senderId, 'You ask for ' + message.text + '\n lattitude : ' + location.lat + '\n longitude' + location.lng);
+                      chatService.sendTextMessage(senderId, 'You ask for ' + message.text + '\n Lattitude : ' + location.lat + '\n Longitude : ' + location.lng);
+                      userService.changeUserStatus(senderId, 'weather')
                     }
                   })
                   .catch(function (err) {
